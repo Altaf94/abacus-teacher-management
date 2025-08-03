@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { apiService } from '../utils/api';
 
 const AuthContext = createContext();
@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Check if user is authenticated on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkAuth();
   }, []);

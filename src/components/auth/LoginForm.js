@@ -5,7 +5,7 @@ import schoolImage from '../../assets/images/university.png';
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

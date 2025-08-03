@@ -1,70 +1,262 @@
-# Getting Started with Create React App
+# Abacus App - Modern React Boilerplate
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive, production-ready React boilerplate with all the essential tools and components for building modern web applications.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Modern React** with hooks and context
+- **Type-safe forms** with React Hook Form + Zod validation
+- **Authentication system** with JWT tokens
+- **Responsive design** with Tailwind CSS
+- **API integration** with Axios and React Query
+- **Error handling** with error boundaries
+- **Loading states** and user feedback
+- **SEO optimized** with React Helmet
+- **Accessibility compliant** components
+- **Code formatting** with Prettier and ESLint
+- **Git hooks** with Husky
 
-### `yarn start`
+## 📦 Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React 19, React Router DOM
+- **Styling**: Tailwind CSS, Lucide React icons
+- **Forms**: React Hook Form, Zod validation
+- **State Management**: React Query, Context API
+- **HTTP Client**: Axios with interceptors
+- **Notifications**: React Hot Toast
+- **SEO**: React Helmet Async
+- **Error Handling**: React Error Boundary
+- **Code Quality**: ESLint, Prettier, Husky
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Getting Started
 
-### `yarn test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Node.js 18+
+- npm or yarn
 
-### `yarn build`
+### Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Clone the repository**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   ```bash
+   git clone <your-repo-url>
+   cd abacus-app
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. **Install dependencies**
 
-### `yarn eject`
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Set up environment variables**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   ```bash
+   cp env.example .env
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+   Edit `.env` with your configuration.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+4. **Start the development server**
 
-## Learn More
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📁 Project Structure
 
-### Code Splitting
+```
+src/
+├── components/          # Reusable UI components
+│   ├── auth/           # Authentication components
+│   ├── common/         # Common components (ErrorBoundary, ProtectedRoute)
+│   ├── layout/         # Layout components (Header, Footer, Layout)
+│   └── ui/             # Base UI components (Button, Input, Card)
+├── hooks/              # Custom React hooks
+├── pages/              # Page components
+├── utils/              # Utility functions
+│   ├── api.js          # API configuration and methods
+│   ├── cn.js           # Class name utility
+│   ├── format.js       # Formatting utilities
+│   └── validation.js   # Validation schemas
+└── App.js              # Main application component
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🔧 Available Scripts
 
-### Analyzing the Bundle Size
+- `npm start` - Start development server
+- `npm build` - Build for production
+- `npm test` - Run tests
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint errors
+- `npm run format` - Format code with Prettier
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🎨 Component Library
 
-### Making a Progressive Web App
+### UI Components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Button** - Multiple variants (default, outline, secondary, etc.)
+- **Input** - Form inputs with validation support
+- **Card** - Content containers with header, content, and footer
+- **LoadingSpinner** - Loading indicators
 
-### Advanced Configuration
+### Layout Components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- **Header** - Navigation with user menu
+- **Footer** - Site footer with links
+- **Layout** - Page wrapper with header/footer
 
-### Deployment
+### Auth Components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- **LoginForm** - User login with validation
+- **RegisterForm** - User registration with validation
 
-### `yarn build` fails to minify
+### Common Components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **ErrorBoundary** - Error catching and display
+- **ProtectedRoute** - Route protection based on authentication
+- **NotFound** - 404 error page
+
+## 🔐 Authentication
+
+The boilerplate includes a complete authentication system:
+
+- JWT token management
+- Automatic token refresh
+- Protected routes
+- Login/Register forms
+- User context
+
+### Usage
+
+```jsx
+import { useAuth } from './hooks/useAuth';
+
+function MyComponent() {
+  const { user, login, logout, isAuthenticated } = useAuth();
+
+  // Use authentication methods
+}
+```
+
+## 📡 API Integration
+
+Configured with Axios and React Query for efficient API calls:
+
+- Automatic token injection
+- Error handling
+- Request/response interceptors
+- Caching and background updates
+
+### Usage
+
+```jsx
+import { apiService } from './utils/api';
+
+// GET request
+const data = await apiService.get('/users');
+
+// POST request
+const result = await apiService.post('/users', userData);
+```
+
+## 🎯 Form Handling
+
+Built-in form validation with React Hook Form and Zod:
+
+```jsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm({
+  resolver: zodResolver(schema),
+});
+```
+
+## 🎨 Styling
+
+Uses Tailwind CSS with custom configuration:
+
+- Custom color palette
+- Responsive design utilities
+- Custom animations
+- Component-based styling
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file based on `env.example`:
+
+```env
+REACT_APP_API_BASE_URL=http://localhost:3001/api
+REACT_APP_AUTH_TOKEN_KEY=abacus_auth_token
+REACT_APP_ENABLE_DEBUG_MODE=false
+```
+
+### Tailwind Configuration
+
+Customize colors, fonts, and utilities in `tailwind.config.js`.
+
+## 🚀 Deployment
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+### Environment Setup
+
+Ensure all environment variables are set in your production environment.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+
+- Create an issue in the repository
+- Check the documentation
+- Review the code examples
+
+## 🔄 Updates
+
+Keep your boilerplate updated:
+
+```bash
+npm update
+npm audit fix
+```
+
+---
+
+Built with ❤️ for modern web development

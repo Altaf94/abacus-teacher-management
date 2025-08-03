@@ -41,7 +41,9 @@ api.interceptors.response.use(
           process.env.REACT_APP_REFRESH_TOKEN_KEY
         );
         if (refreshToken) {
-          const response = await axios.post('/auth/refresh', { refreshToken });
+          const response = await axios.post('/auth/refresh', {
+            refreshToken,
+          });
           const { accessToken } = response.data;
 
           localStorage.setItem(

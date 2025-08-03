@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }) => {
   }, [logout]);
 
   // Check if user is authenticated on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);

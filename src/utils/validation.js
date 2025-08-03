@@ -21,7 +21,7 @@ export const nameSchema = z
 
 export const phoneSchema = z
   .string()
-  .regex(/^\+?[\d\s\-\(\)]+$/, 'Please enter a valid phone number')
+  .regex(/^\+?[\d\s\-()]+$/, 'Please enter a valid phone number')
   .min(10, 'Phone number must be at least 10 digits');
 
 export const urlSchema = z.string().url('Please enter a valid URL');

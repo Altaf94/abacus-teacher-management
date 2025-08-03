@@ -1,4 +1,10 @@
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useCallback,
+} from 'react';
 import { apiService } from '../utils/api';
 
 const AuthContext = createContext();
@@ -16,13 +22,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if user is authenticated on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    checkAuth();
+  const logout = useCallback(() => {
+    localStorage.removeItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
+    localStorage.removeItem(process.env.REACT_APP_REFRESH_TOKEN_KEY);
+    setUser(null);
+    setError(null);
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const token = localStorage.getItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
       if (token) {
@@ -35,7 +42,13 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logout]);
+
+  // Check if user is authenticated on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const login = async credentials => {
     // MOCKED LOGIN: No network call
@@ -78,13 +91,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
-    localStorage.removeItem(process.env.REACT_APP_REFRESH_TOKEN_KEY);
-    setUser(null);
-    setError(null);
   };
 
   const updateProfile = async profileData => {

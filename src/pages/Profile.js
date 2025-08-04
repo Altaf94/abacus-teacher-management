@@ -152,9 +152,9 @@ const Profile = () => {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-2 sm:p-4">
         {/* Profile Card */}
-        <div className="bg-amber-50 rounded-2xl shadow-xl border border-amber-200 p-8 max-w-4xl w-full relative">
+        <div className="bg-amber-50 rounded-2xl shadow-xl border border-amber-200 p-4 sm:p-6 md:p-8 max-w-4xl w-full relative">
           {/* Profile Icon - Top Left */}
           <div className="absolute top-4 left-4 flex flex-col items-center">
             <div className="w-20 h-20 flex items-center justify-center mb-2">
@@ -197,13 +197,13 @@ const Profile = () => {
           </h1>
 
           {/* Form and Student Illustration */}
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 items-start">
             {/* Form Fields */}
-            <div className="flex-1 space-y-6">
+            <div className="flex-1 space-y-4 sm:space-y-6">
               <div className="flex flex-col">
-                <div className="flex items-center">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
                   <label
-                    className={`w-28 text-black ${getTypographyClass('label')}`}
+                    className={`w-full sm:w-28 text-black ${getTypographyClass('label')}`}
                   >
                     TME ID:
                   </label>
@@ -213,7 +213,7 @@ const Profile = () => {
                     value={formData.tmeId}
                     onChange={handleInputChange}
                     disabled={!isEditing}
-                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${getTypographyClass('input')} ${
+                    className={`flex-1 sm:ml-4 px-3 sm:px-4 py-2 sm:py-3 border rounded bg-white text-black disabled:bg-gray-100 ${getTypographyClass('input')} ${
                       errors.tmeId ? 'border-red-500' : 'border-blue-600'
                     }`}
                   />
@@ -221,9 +221,9 @@ const Profile = () => {
               </div>
 
               <div className="flex flex-col">
-                <div className="flex items-center">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
                   <label
-                    className={`w-28 text-black ${getTypographyClass('label')}`}
+                    className={`w-full sm:w-28 text-black ${getTypographyClass('label')}`}
                   >
                     Name:
                   </label>
@@ -233,7 +233,7 @@ const Profile = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     disabled={!isEditing}
-                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${getTypographyClass('input')} ${
+                    className={`flex-1 sm:ml-4 px-3 sm:px-4 py-2 sm:py-3 border rounded bg-white text-black disabled:bg-gray-100 ${getTypographyClass('input')} ${
                       errors.name ? 'border-red-500' : 'border-blue-600'
                     }`}
                   />
@@ -241,15 +241,15 @@ const Profile = () => {
               </div>
 
               <div className="flex flex-col">
-                <div className="flex items-center">
-                  <label className="w-28 text-black font-medium">Level:</label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                  <label className="w-full sm:w-28 text-black font-medium">Level:</label>
                   <input
                     type="text"
                     name="level"
                     value={formData.level}
                     onChange={handleInputChange}
                     disabled={!isEditing}
-                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
+                    className={`flex-1 sm:ml-4 px-3 sm:px-4 py-2 sm:py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
                       errors.level ? 'border-red-500' : 'border-blue-600'
                     }`}
                   />
@@ -257,8 +257,8 @@ const Profile = () => {
               </div>
 
               <div className="flex flex-col">
-                <div className="flex items-center">
-                  <label className="w-28 text-black font-medium">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                  <label className="w-full sm:w-28 text-black font-medium">
                     Email Address:
                   </label>
                   <input
@@ -267,7 +267,7 @@ const Profile = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     disabled={!isEditing}
-                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
+                    className={`flex-1 sm:ml-4 px-3 sm:px-4 py-2 sm:py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
                       errors.email ? 'border-red-500' : 'border-blue-600'
                     }`}
                   />
@@ -275,8 +275,8 @@ const Profile = () => {
               </div>
 
               <div className="flex flex-col">
-                <div className="flex items-center">
-                  <label className="w-28 text-black font-medium">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                  <label className="w-full sm:w-28 text-black font-medium">
                     Password:
                   </label>
                   <input
@@ -285,7 +285,7 @@ const Profile = () => {
                     value={formData.password}
                     onChange={handleInputChange}
                     disabled={!isEditing}
-                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
+                    className={`flex-1 sm:ml-4 px-3 sm:px-4 py-2 sm:py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
                       errors.password ? 'border-red-500' : 'border-blue-600'
                     }`}
                   />
@@ -294,8 +294,8 @@ const Profile = () => {
             </div>
 
             {/* Student Illustration */}
-            <div className="flex-shrink-0 flex items-center justify-center">
-              <div className="w-56 h-72 relative">
+            <div className="flex-shrink-0 flex items-center justify-center mt-6 lg:mt-0">
+              <div className="w-40 h-52 sm:w-48 sm:h-60 md:w-56 md:h-72 relative">
                 <img
                   src={studentMaleIcon}
                   alt="Student"
@@ -306,18 +306,18 @@ const Profile = () => {
           </div>
 
           {/* Action Buttons - Bottom Right */}
-          <div className="flex justify-end gap-4 mt-12">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 mt-8 sm:mt-12">
             <button
               onClick={handleEdit}
               disabled={isSubmitting}
-              className={`px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getTypographyClass('buttonLarge')}`}
+              className={`px-4 sm:px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getTypographyClass('buttonLarge')}`}
             >
               EDIT
             </button>
             <button
               onClick={handleSave}
               disabled={!isEditing || isSubmitting}
-              className={`px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getTypographyClass('buttonLarge')}`}
+              className={`px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getTypographyClass('buttonLarge')}`}
             >
               {isSubmitting ? 'SAVING...' : 'SAVE'}
             </button>

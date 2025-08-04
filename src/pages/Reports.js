@@ -92,17 +92,17 @@ const Reports = () => {
           {/* Table Header */}
           <div className="bg-blue-600 text-white rounded-t-lg p-1 sm:p-2 md:p-3">
             <div className="grid grid-cols-5 gap-1 sm:gap-2 md:gap-3 text-center font-bold text-xs sm:text-sm md:text-base">
-              <div className="truncate">Date/Time</div>
-              <div className="truncate">Questions</div>
-              <div className="truncate">Answer</div>
-              <div className="truncate">Response</div>
-              <div className="truncate">Accuracy</div>
+              <div className="truncate px-1">Date/Time</div>
+              <div className="truncate px-1">Questions</div>
+              <div className="truncate px-1">Answer</div>
+              <div className="truncate px-1">Response</div>
+              <div className="truncate px-1">Accuracy</div>
             </div>
           </div>
 
           {/* Table Body */}
           <div className="bg-white border border-gray-300 rounded-b-lg h-full flex items-center justify-center overflow-auto">
-            <div className="text-gray-500 text-xs sm:text-sm md:text-base font-serif p-2 sm:p-3 text-center">
+            <div className="text-gray-500 text-xs sm:text-sm md:text-base font-serif p-2 sm:p-3 text-center max-w-full">
               No report data available for the selected duration
             </div>
           </div>

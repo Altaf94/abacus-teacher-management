@@ -52,7 +52,11 @@ const Worksheets = () => {
             onClick={handleLogout}
             className="flex flex-col items-center group focus:outline-none order-3"
           >
-            <img src={logoutIcon} alt="Logout" className="w-8 h-8 sm:w-12 sm:h-12 mb-1" />
+            <img
+              src={logoutIcon}
+              alt="Logout"
+              className="w-8 h-8 sm:w-12 sm:h-12 mb-1"
+            />
             <span className="text-black text-sm sm:text-lg font-serif group-hover:underline">
               Logout
             </span>

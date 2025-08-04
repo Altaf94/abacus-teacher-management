@@ -242,7 +242,9 @@ const Profile = () => {
 
               <div className="flex flex-col">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                  <label className="w-full sm:w-28 text-black font-medium">Level:</label>
+                  <label className="w-full sm:w-28 text-black font-medium">
+                    Level:
+                  </label>
                   <input
                     type="text"
                     name="level"

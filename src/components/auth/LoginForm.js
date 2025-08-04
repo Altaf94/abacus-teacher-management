@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 import schoolImage from '../../assets/images/university.png';
 
@@ -15,9 +16,12 @@ const LoginForm = () => {
     setError('');
     const result = await login({ email, password });
     if (result.success) {
+      toast.success('Login successful!');
       navigate('/dashboard');
     } else {
-      setError(result.error || 'Invalid username or password');
+      const errorMessage = result.error || 'Invalid username or password';
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 

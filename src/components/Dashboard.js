@@ -25,13 +25,7 @@ const Dashboard = () => {
   // Debug: Log when Dashboard renders
   console.log('Dashboard rendered');
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center bg-yellow-50 p-4"
-      style={{
-        backgroundImage: 'url(/bg-pattern.png)',
-        backgroundSize: 'cover',
-      }}
-    >
+    <div className="min-h-screen w-full flex items-center justify-center bg-yellow-50 p-4">
       <div
         className="relative w-full max-w-4xl mx-auto bg-[#faf9ed] rounded-2xl shadow-xl border border-yellow-300 p-6 md:p-8 lg:p-12 flex flex-col items-center"
         style={{ minHeight: '70vh' }}

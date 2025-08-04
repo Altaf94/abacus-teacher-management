@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import universityIcon from '../assets/images/university.png';
+import profileIcon from '../assets/images/Profile.png';
+import logoutIcon from '../assets/images/Logout.png';
+import studentMaleIcon from '../assets/images/student-male.png';
+import { getTypographyClass } from '../utils/typography';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -11,6 +17,8 @@ const Profile = () => {
     password: '',
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -20,14 +28,85 @@ const Profile = () => {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    // TME ID validation
+    if (!formData.tmeId.trim()) {
+      newErrors.tmeId = 'TME ID is required';
+    } else if (formData.tmeId.trim().length < 3) {
+      newErrors.tmeId = 'TME ID must be at least 3 characters';
+    }
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    // Level validation
+    if (!formData.level.trim()) {
+      newErrors.level = 'Level is required';
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = 'Please enter a valid email address';
+      }
+    }
+
+    // Password validation
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    setErrors(newErrors);
+
+    // Show toast notification for first error
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError);
+    }
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleEdit = () => {
+    setErrors({});
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Here you would typically save the data to your backend
-    console.log('Saving profile data:', formData);
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setIsEditing(false);
+      setErrors({});
+      // Here you would typically save the data to your backend
+      console.log('Saving profile data:', formData);
+
+      // Show success message using toast notification
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error('Failed to update profile. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleLogout = () => {
@@ -42,7 +121,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background - Full light yellow */}
-      <div className="absolute inset-0 bg-yellow-100">
+      <div className="absolute inset-0 bg-yellow-50">
         {/* Mathematical symbols pattern scattered across the background */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-10 left-10 text-yellow-400 text-4xl">
@@ -78,18 +157,8 @@ const Profile = () => {
         <div className="bg-amber-50 rounded-2xl shadow-xl border border-amber-200 p-8 max-w-4xl w-full relative">
           {/* Profile Icon - Top Left */}
           <div className="absolute top-4 left-4 flex flex-col items-center">
-            <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center mb-1">
-              <svg
-                className="w-8 h-8 text-blue-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="w-20 h-20 flex items-center justify-center mb-2">
+              <img src={profileIcon} alt="Profile" className="w-16 h-16" />
             </div>
             <span className="text-xs text-gray-600">Profile</span>
           </div>
@@ -99,20 +168,8 @@ const Profile = () => {
             onClick={handleLogout}
             className="absolute top-4 right-4 flex flex-col items-center group focus:outline-none"
           >
-            <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center mb-1 group-hover:bg-blue-300 transition-colors">
-              <svg
-                className="w-8 h-8 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
+            <div className="w-20 h-20 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <img src={logoutIcon} alt="Logout" className="w-16 h-16" />
             </div>
             <span className="text-xs text-black group-hover:underline">
               Logout
@@ -124,14 +181,8 @@ const Profile = () => {
             onClick={handleDashboard}
             className="absolute bottom-4 left-4 flex flex-col items-center group focus:outline-none"
           >
-            <div className="w-12 h-12 bg-red-200 rounded-lg flex items-center justify-center mb-1 group-hover:bg-red-300 transition-colors">
-              <svg
-                className="w-8 h-8 text-red-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
+            <div className="w-20 h-20 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <img src={universityIcon} alt="Dashboard" className="w-16 h-16" />
             </div>
             <span className="text-xs text-black font-bold group-hover:underline">
               DASHBOARD
@@ -139,205 +190,136 @@ const Profile = () => {
           </button>
 
           {/* Title */}
-          <h1 className="text-3xl font-bold text-black text-center mb-8">
+          <h1
+            className={`${getTypographyClass('h2')} text-black text-center mb-12 mt-16`}
+          >
             My Profile
           </h1>
 
           {/* Form and Student Illustration */}
-          <div className="flex flex-col lg:flex-row gap-8 items-center">
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Form Fields */}
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center">
-                <label className="w-24 text-black font-medium">TME ID:</label>
-                <input
-                  type="text"
-                  name="tmeId"
-                  value={formData.tmeId}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="flex-1 ml-4 px-3 py-2 border border-blue-600 rounded bg-white text-black disabled:bg-gray-100"
-                />
+            <div className="flex-1 space-y-6">
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <label
+                    className={`w-28 text-black ${getTypographyClass('label')}`}
+                  >
+                    TME ID:
+                  </label>
+                  <input
+                    type="text"
+                    name="tmeId"
+                    value={formData.tmeId}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${getTypographyClass('input')} ${
+                      errors.tmeId ? 'border-red-500' : 'border-blue-600'
+                    }`}
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <label className="w-24 text-black font-medium">Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="flex-1 ml-4 px-3 py-2 border border-blue-600 rounded bg-white text-black disabled:bg-gray-100"
-                />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <label
+                    className={`w-28 text-black ${getTypographyClass('label')}`}
+                  >
+                    Name:
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${getTypographyClass('input')} ${
+                      errors.name ? 'border-red-500' : 'border-blue-600'
+                    }`}
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <label className="w-24 text-black font-medium">Level:</label>
-                <input
-                  type="text"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="flex-1 ml-4 px-3 py-2 border border-blue-600 rounded bg-white text-black disabled:bg-gray-100"
-                />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <label className="w-28 text-black font-medium">Level:</label>
+                  <input
+                    type="text"
+                    name="level"
+                    value={formData.level}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
+                      errors.level ? 'border-red-500' : 'border-blue-600'
+                    }`}
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <label className="w-24 text-black font-medium">
-                  Email Address:
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="flex-1 ml-4 px-3 py-2 border border-blue-600 rounded bg-white text-black disabled:bg-gray-100"
-                />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <label className="w-28 text-black font-medium">
+                    Email Address:
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
+                      errors.email ? 'border-red-500' : 'border-blue-600'
+                    }`}
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <label className="w-24 text-black font-medium">Password:</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="flex-1 ml-4 px-3 py-2 border border-blue-600 rounded bg-white text-black disabled:bg-gray-100"
-                />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <label className="w-28 text-black font-medium">
+                    Password:
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`flex-1 ml-4 px-4 py-3 border rounded bg-white text-black disabled:bg-gray-100 ${
+                      errors.password ? 'border-red-500' : 'border-blue-600'
+                    }`}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Student Illustration */}
-            <div className="flex-shrink-0">
-              <div className="w-48 h-64 relative">
-                {/* Student with graduation cap */}
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 200 250"
-                  fill="none"
-                >
-                  {/* Graduation cap */}
-                  <ellipse
-                    cx="100"
-                    cy="40"
-                    rx="35"
-                    ry="8"
-                    fill="#3b82f6"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-                  <rect
-                    x="65"
-                    y="40"
-                    width="70"
-                    height="8"
-                    fill="#3b82f6"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-                  <rect
-                    x="95"
-                    y="48"
-                    width="10"
-                    height="15"
-                    fill="#3b82f6"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-
-                  {/* Face */}
-                  <circle
-                    cx="100"
-                    cy="80"
-                    r="20"
-                    fill="#fbbf24"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-
-                  {/* Eyes */}
-                  <circle cx="95" cy="75" r="2" fill="black" />
-                  <circle cx="105" cy="75" r="2" fill="black" />
-
-                  {/* Smile */}
-                  <path
-                    d="M 90 85 Q 100 95 110 85"
-                    stroke="black"
-                    strokeWidth="2"
-                    fill="none"
-                  />
-
-                  {/* Body */}
-                  <rect
-                    x="80"
-                    y="100"
-                    width="40"
-                    height="60"
-                    fill="#fbbf24"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-
-                  {/* Arms */}
-                  <rect
-                    x="70"
-                    y="110"
-                    width="15"
-                    height="40"
-                    fill="#fbbf24"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-                  <rect
-                    x="115"
-                    y="110"
-                    width="15"
-                    height="40"
-                    fill="#fbbf24"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-
-                  {/* Book */}
-                  <rect
-                    x="60"
-                    y="120"
-                    width="25"
-                    height="30"
-                    fill="white"
-                    stroke="black"
-                    strokeWidth="2"
-                  />
-                  <rect x="62" y="122" width="21" height="26" fill="#ef4444" />
-                  <line
-                    x1="72"
-                    y1="122"
-                    x2="72"
-                    y2="148"
-                    stroke="black"
-                    strokeWidth="1"
-                  />
-                </svg>
+            <div className="flex-shrink-0 flex items-center justify-center">
+              <div className="w-56 h-72 relative">
+                <img
+                  src={studentMaleIcon}
+                  alt="Student"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </div>
 
           {/* Action Buttons - Bottom Right */}
-          <div className="flex justify-end gap-4 mt-8">
+          <div className="flex justify-end gap-4 mt-12">
             <button
               onClick={handleEdit}
-              className="px-6 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors"
+              disabled={isSubmitting}
+              className={`px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getTypographyClass('buttonLarge')}`}
             >
               EDIT
             </button>
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors"
+              disabled={!isEditing || isSubmitting}
+              className={`px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed ${getTypographyClass('buttonLarge')}`}
             >
-              SAVE
+              {isSubmitting ? 'SAVING...' : 'SAVE'}
             </button>
           </div>
         </div>

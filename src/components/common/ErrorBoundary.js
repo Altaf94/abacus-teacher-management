@@ -4,7 +4,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 const ErrorFallback = ({ error, resetErrorBoundary }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
       <div className="max-w-md w-full text-center">
         <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
           <AlertTriangle className="w-8 h-8 text-red-600" />

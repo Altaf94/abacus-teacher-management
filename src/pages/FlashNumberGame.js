@@ -23,13 +23,7 @@ const activities = Array.from({ length: 12 }, (_, i) => {
 export default function FlashNumberGame() {
   const navigate = useNavigate();
   return (
-    <div
-      className="min-h-screen bg-yellow-100 flex items-center justify-center"
-      style={{
-        backgroundImage: 'url(/src/assets/images/Schoolimage.png)',
-        backgroundSize: 'cover',
-      }}
-    >
+    <div className="min-h-screen bg-yellow-50 flex items-center justify-center">
       <div className="bg-[#faf9ed] rounded-3xl shadow-lg w-[95vw] max-w-[1600px] min-h-[90vh] p-4 sm:p-6 md:p-8 flex flex-col relative">
         {/* Top Row */}
         <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 sm:mb-6 md:mb-8 gap-4 sm:gap-0">

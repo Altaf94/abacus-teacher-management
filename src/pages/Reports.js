@@ -46,10 +46,6 @@ const Reports = () => {
     navigate('/dashboard');
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
   const handleGenerate = () => {
     // Move to results screen; in a real app, fetch data using the selections
     setStep('results');

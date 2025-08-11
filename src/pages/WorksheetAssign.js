@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import WorksheetsImage from '../assets/images/Worksheets.png';
 import StudentImage from '../assets/images/student-male.png';
 import UniversityImage from '../assets/images/university.png';
 import LogoutImage from '../assets/images/Logout.png';
@@ -10,7 +9,7 @@ const WorksheetAssign = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  const planItems = state?.planItems ?? [];
+  const planItems = useMemo(() => state?.planItems ?? [], [state?.planItems]);
 
   const totalQuestions = useMemo(
     () => planItems.reduce((sum, item) => sum + item.count, 0),

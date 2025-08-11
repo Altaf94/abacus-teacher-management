@@ -12,8 +12,11 @@ import ForgetPassword from './components/auth/ForgetPassword';
 import Dashboard from './components/Dashboard';
 import FlashNumberGame from './pages/FlashNumberGame';
 import DynamicActivity from './pages/DynamicActivity';
+import AssignFlash from './pages/AssignFlash';
+import NotificationSent from './pages/NotificationSent';
 import Reports from './pages/Reports';
 import Worksheets from './pages/Worksheets';
+import WorksheetAssign from './pages/WorksheetAssign';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import './App.css';
@@ -89,6 +92,26 @@ function App() {
                     }
                   />
 
+                  {/* Assign Flash route */}
+                  <Route
+                    path="/assign"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <AssignFlash />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Notification Sent route */}
+                  <Route
+                    path="/notification-sent"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <NotificationSent />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   {/* Reports route */}
                   <Route
                     path="/reports"
@@ -105,6 +128,14 @@ function App() {
                     element={
                       <ProtectedRoute requireAuth={true}>
                         <Worksheets />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/worksheets/assign"
+                    element={
+                      <ProtectedRoute requireAuth={true}>
+                        <WorksheetAssign />
                       </ProtectedRoute>
                     }
                   />

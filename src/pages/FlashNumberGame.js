@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import flashNumberIcon from '../assets/images/Flashnumber.png';
 import logoutIcon from '../assets/images/Logout.png';
 import universityIcon from '../assets/images/university.png';
 import studentIcon from '../assets/images/student-male.png';
+import { apiService } from '../utils/api';
 
 function Stepper({
   value,
@@ -51,19 +53,47 @@ function Stepper({
 export default function FlashNumberGame() {
   const navigate = useNavigate();
 
-  const concepts = ['Junior +4', 'Senior +4', 'Senior -4', 'Multiplication'];
-
-  const [selectedConcept, setSelectedConcept] = useState(concepts[0]);
+  const [concepts, setConcepts] = useState([]);
+  const [selectedConcept, setSelectedConcept] = useState('');
   const [questionLength, setQuestionLength] = useState(6);
   const [numQuestions, setNumQuestions] = useState(10);
   const [speedSeconds, setSpeedSeconds] = useState(1.2);
+  const [items, setItems] = useState([]);
+  const [isLoadingConcepts, setIsLoadingConcepts] = useState(true);
 
-  const [items, setItems] = useState([
-    { id: 1, concept: 'Junior +4', questions: 5, time: 2.1 },
-    { id: 2, concept: 'Senior +4', questions: 3, time: 0.8 },
-    { id: 3, concept: 'Senior +4', questions: 13, time: 1.2 },
-    { id: 4, concept: 'Multiplication', questions: 10, time: 5 },
-  ]);
+  // Fetch complexities from API
+  useEffect(() => {
+    const fetchConcepts = async () => {
+      try {
+        setIsLoadingConcepts(true);
+        const response = await apiService.get('/complexities/');
+        const complexitiesData = response.data?.complexities || [];
+        setConcepts(complexitiesData);
+
+        // Set the first concept as selected if available
+        if (complexitiesData.length > 0) {
+          setSelectedConcept(complexitiesData[0].name);
+        }
+      } catch (error) {
+        console.error('Error fetching complexities:', error);
+        toast.error('Failed to load concepts. Please try again.');
+
+        // Fallback to hardcoded concepts if API fails
+        const fallbackConcepts = [
+          { id: 1, name: 'Junior +4' },
+          { id: 2, name: 'Senior +4' },
+          { id: 3, name: 'Senior -4' },
+          { id: 4, name: 'Multiplication' },
+        ];
+        setConcepts(fallbackConcepts);
+        setSelectedConcept(fallbackConcepts[0].name);
+      } finally {
+        setIsLoadingConcepts(false);
+      }
+    };
+
+    fetchConcepts();
+  }, []);
 
   const totalQuestions = useMemo(
     () => items.reduce((sum, r) => sum + (Number(r.questions) || 0), 0),
@@ -88,14 +118,25 @@ export default function FlashNumberGame() {
   };
 
   const assign = () => {
-    // Store current plan for potential later use
+    // Store all current form data for the next page
     try {
-      const payload = { items, createdAt: Date.now() };
+      const payload = {
+        items,
+        currentSettings: {
+          selectedConcept,
+          questionLength,
+          numQuestions,
+          speedSeconds,
+        },
+        createdAt: Date.now(),
+      };
       window.sessionStorage.setItem(
         'flashGeneratorPlan',
         JSON.stringify(payload)
       );
-    } catch (_) {}
+    } catch (error) {
+      console.error('Error storing flash generator plan:', error);
+    }
     navigate('/assign');
   };
 
@@ -104,17 +145,17 @@ export default function FlashNumberGame() {
       {/* background */}
       <div className="absolute inset-0 bg-yellow-200/60" />
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 md:p-8">
-        <div className="bg-[#faf9ed] rounded-3xl shadow-lg w-[95vw] max-w-[1600px] min-h-[88vh] p-6 md:p-10 flex flex-col relative">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-8">
+        <div className="bg-[#faf9ed] rounded-2xl sm:rounded-3xl shadow-lg w-[95vw] sm:w-[90vw] max-w-[1400px] min-h-[85vh] sm:min-h-[80vh] p-3 sm:p-5 md:p-8 flex flex-col relative pb-20 sm:pb-16 md:pb-20">
           {/* header */}
-          <div className="flex items-start justify-between mb-6 md:mb-8">
+          <div className="flex items-start justify-between mb-3 sm:mb-4 md:mb-6">
             <img
               src={flashNumberIcon}
               alt="Flash"
-              className="w-16 h-16 md:w-24 md:h-24"
+              className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20"
             />
             <h1
-              className="text-2xl md:text-4xl font-extrabold tracking-wide"
+              className="text-base sm:text-xl md:text-3xl font-extrabold tracking-wide text-center px-2"
               style={{ fontFamily: 'Poppins, sans-serif' }}
             >
               FLASH NUMBER GENERATOR
@@ -126,127 +167,156 @@ export default function FlashNumberGame() {
               <img
                 src={logoutIcon}
                 alt="Logout"
-                className="w-10 h-10 md:w-16 md:h-16"
+                className="w-7 h-7 sm:w-9 sm:h-9 md:w-14 md:h-14"
               />
-              <span className="text-sm md:text-base mt-1">Logout</span>
+              <span className="text-xs sm:text-sm md:text-base mt-1">
+                Logout
+              </span>
             </button>
           </div>
 
           {/* content */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             {/* left controls */}
-            <div className="flex flex-col gap-8 px-2 md:px-6">
+            <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 px-1 sm:px-2 md:px-4 items-center sm:items-start">
               {/* Concept row */}
-              <div className="grid grid-cols-[260px_1fr_60px] items-center gap-4">
-                <div className="text-lg md:text-xl font-semibold text-gray-900">
+              <div className="flex flex-col sm:grid sm:grid-cols-[200px_1fr] lg:grid-cols-[260px_1fr] items-center sm:items-start lg:items-center gap-2 sm:gap-4">
+                <div className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 text-center sm:text-left">
                   Concept:
                 </div>
-                <div className="flex items-center">
+                <div className="w-full">
                   <select
                     value={selectedConcept}
                     onChange={e => setSelectedConcept(e.target.value)}
-                    className="w-full md:w-96 h-12 border-2 border-gray-300 rounded-md px-4 text-base md:text-lg font-semibold bg-white"
+                    disabled={isLoadingConcepts}
+                    className="w-full h-10 sm:h-12 border-2 border-gray-300 rounded-md px-3 sm:px-4 text-sm sm:text-base md:text-lg font-semibold bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {concepts.map(c => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
+                    {isLoadingConcepts ? (
+                      <option value="">Loading concepts...</option>
+                    ) : concepts.length > 0 ? (
+                      concepts.map(concept => (
+                        <option key={concept.id} value={concept.name}>
+                          {concept.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">No concepts available</option>
+                    )}
                   </select>
                 </div>
-                <div />
               </div>
 
               {/* Length of Question */}
-              <div className="grid grid-cols-[260px_1fr] items-center gap-4">
-                <div className="text-lg md:text-xl font-semibold text-gray-900">
+              <div className="flex flex-col sm:grid sm:grid-cols-[200px_1fr] lg:grid-cols-[260px_1fr] items-center sm:items-start lg:items-center gap-2 sm:gap-4">
+                <div className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 text-center sm:text-left">
                   Length of Question:
                 </div>
-                <Stepper
-                  value={questionLength}
-                  onChange={setQuestionLength}
-                  min={1}
-                  max={20}
-                  step={1}
-                />
+                <div className="flex justify-center sm:justify-start">
+                  <Stepper
+                    value={questionLength}
+                    onChange={setQuestionLength}
+                    min={1}
+                    max={20}
+                    step={1}
+                  />
+                </div>
               </div>
 
               {/* Numbers of Questions */}
-              <div className="grid grid-cols-[260px_1fr] items-center gap-4">
-                <div className="text-lg md:text-xl font-semibold text-gray-900">
+              <div className="flex flex-col sm:grid sm:grid-cols-[200px_1fr] lg:grid-cols-[260px_1fr] items-center sm:items-start lg:items-center gap-2 sm:gap-4">
+                <div className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 text-center sm:text-left">
                   Numbers of Questions:
                 </div>
-                <Stepper
-                  value={numQuestions}
-                  onChange={setNumQuestions}
-                  min={1}
-                  max={200}
-                  step={1}
-                />
+                <div className="flex justify-center sm:justify-start">
+                  <Stepper
+                    value={numQuestions}
+                    onChange={setNumQuestions}
+                    min={1}
+                    max={200}
+                    step={1}
+                  />
+                </div>
               </div>
 
               {/* Speed */}
-              <div className="grid grid-cols-[260px_1fr] items-center gap-4">
-                <div className="flex items-end gap-3">
-                  <div className="text-lg md:text-xl font-semibold text-gray-900">
+              <div className="flex flex-col sm:grid sm:grid-cols-[200px_1fr] lg:grid-cols-[260px_1fr] items-center sm:items-start lg:items-center gap-2 sm:gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-3">
+                  <div className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 text-center sm:text-left">
                     Set the speed:
                   </div>
-                  <div className="italic text-gray-600">(in Seconds)</div>
+                  <div className="italic text-gray-600 text-xs sm:text-sm text-center sm:text-left">
+                    (in Seconds)
+                  </div>
                 </div>
-                <Stepper
-                  value={speedSeconds}
-                  onChange={setSpeedSeconds}
-                  min={0.1}
-                  max={10}
-                  step={0.1}
-                  formatValue={v => `${v.toFixed(1)}s`}
-                />
+                <div className="flex justify-center sm:justify-start">
+                  <Stepper
+                    value={speedSeconds}
+                    onChange={setSpeedSeconds}
+                    min={0.1}
+                    max={10}
+                    step={0.1}
+                    formatValue={v => `${v.toFixed(1)}s`}
+                  />
+                </div>
               </div>
 
               {/* Add button */}
-              <div className="pt-2 flex justify-center">
+              <div className="pt-2 flex justify-center w-full">
                 <button
                   onClick={addItem}
-                  className="w-32 h-24 md:w-36 md:h-28 rounded-xl border-4 border-blue-500 bg-white shadow hover:shadow-md flex flex-col items-center justify-center gap-2"
+                  className="w-24 h-18 sm:w-28 sm:h-20 md:w-32 md:h-24 rounded-xl border-4 border-blue-500 bg-white shadow hover:shadow-md flex flex-col items-center justify-center gap-1 sm:gap-2 active:scale-95 transition-transform"
                 >
-                  <span className="text-3xl">✍️</span>
-                  <span className="font-bold text-base">ADD</span>
+                  <span className="text-xl sm:text-2xl">✍️</span>
+                  <span className="font-bold text-xs sm:text-sm">ADD</span>
                 </button>
               </div>
             </div>
 
             {/* right list */}
-            <div className="bg-white/70 border border-blue-300 rounded-2xl p-3 md:p-4 flex flex-col max-w-[520px] w-full">
-              <div className="grid grid-cols-[1fr_90px_70px_44px] text-sm md:text-base font-semibold px-2 pb-1 border-b border-blue-200 text-gray-900">
+            <div className="bg-white/70 border border-blue-300 rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 flex flex-col w-full overflow-hidden max-w-[480px] mx-auto">
+              <div className="grid grid-cols-[2fr_1fr_1fr_1fr] text-xs sm:text-sm md:text-base font-semibold px-1 sm:px-2 pb-1 border-b border-blue-200 text-gray-900">
                 <div>CONCEPT</div>
                 <div className="text-center">Questions</div>
                 <div className="text-center">Time</div>
-                <div className="text-center"></div>
+                <div className="text-center">Action</div>
               </div>
-              <div className="flex-1 divide-y divide-gray-200">
-                {items.map(row => (
-                  <div
-                    key={row.id}
-                    className="grid grid-cols-[1fr_90px_70px_44px] items-center px-2 py-2 text-xs md:text-sm"
-                  >
-                    <div className="truncate">{row.concept}</div>
-                    <div className="text-center">{row.questions}</div>
-                    <div className="text-center">
-                      {Number(row.time).toString()}s
-                    </div>
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => removeItem(row.id)}
-                        className="w-7 h-7 rounded-md bg-blue-400 hover:bg-blue-500"
-                        aria-label={`remove ${row.concept}`}
-                      />
-                    </div>
+              <div className="flex-1 divide-y divide-gray-200 max-h-64 sm:max-h-80 overflow-y-auto">
+                {items.length === 0 ? (
+                  <div className="px-1 sm:px-2 py-6 sm:py-8 text-center text-gray-500 italic text-xs sm:text-sm">
+                    No items added yet. Use the ADD button to create flash
+                    number activities.
                   </div>
-                ))}
+                ) : (
+                  items.map(row => (
+                    <div
+                      key={row.id}
+                      className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center px-1 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm"
+                    >
+                      <div className="truncate pr-1 font-medium">
+                        {row.concept}
+                      </div>
+                      <div className="text-center font-semibold">
+                        {row.questions}
+                      </div>
+                      <div className="text-center font-semibold">
+                        {Number(row.time).toString()}s
+                      </div>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => removeItem(row.id)}
+                          className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-red-400 hover:bg-red-500 active:scale-95 transition-transform text-white font-bold"
+                          aria-label={`remove ${row.concept}`}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
-              <div className="mt-4">
-                <div className="bg-yellow-500 rounded-lg px-3 md:px-4 py-2 flex items-center justify-between text-black font-bold text-base md:text-lg border border-yellow-600">
+              <div className="mt-3 sm:mt-4 mb-2">
+                <div className="bg-yellow-500 rounded-lg px-2 sm:px-3 md:px-4 py-2 flex items-center justify-between text-black font-bold text-sm sm:text-base md:text-lg border border-yellow-600">
                   <span>Total Questions</span>
                   <span>{totalQuestions}</span>
                 </div>
@@ -255,7 +325,7 @@ export default function FlashNumberGame() {
           </div>
 
           {/* footer actions */}
-          <div className="absolute left-4 md:left-8 bottom-4 flex flex-col items-center">
+          <div className="absolute left-3 sm:left-4 md:left-8 bottom-3 sm:bottom-4 flex flex-col items-center">
             <button
               onClick={() => navigate('/dashboard')}
               className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
@@ -263,15 +333,15 @@ export default function FlashNumberGame() {
               <img
                 src={universityIcon}
                 alt="Dashboard"
-                className="w-14 h-14 md:w-20 md:h-20"
+                className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16"
               />
-              <span className="text-xs md:text-sm font-semibold mt-1">
+              <span className="text-xs sm:text-sm md:text-base font-semibold mt-1">
                 DASHBOARD
               </span>
             </button>
           </div>
 
-          <div className="absolute right-4 md:right-8 bottom-4 flex flex-col items-center">
+          <div className="absolute right-3 sm:right-4 md:right-8 bottom-3 sm:bottom-4 flex flex-col items-center">
             <button
               onClick={assign}
               className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
@@ -279,9 +349,9 @@ export default function FlashNumberGame() {
               <img
                 src={studentIcon}
                 alt="Assign"
-                className="w-14 h-14 md:w-20 md:h-20"
+                className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16"
               />
-              <span className="text-xs md:text-sm font-semibold mt-1">
+              <span className="text-xs sm:text-sm md:text-base font-semibold mt-1">
                 Assign
               </span>
             </button>

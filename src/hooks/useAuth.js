@@ -33,8 +33,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
       if (token) {
-        const response = await apiService.get('/auth/me');
-        setUser(response.data);
+        // Skip the /auth/me call since this endpoint doesn't exist
+        // Just set a basic user object if token exists
+        setUser({ username: 'authenticated_user' });
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -50,18 +51,39 @@ export const AuthProvider = ({ children }) => {
   }, [checkAuth]);
 
   const login = async credentials => {
-    // MOCKED LOGIN: No network call
-    const { email, password } = credentials;
-    if (email === 'KarimJindani@gmail.com' && password === 'Test123') {
-      setUser({ email });
+    try {
+      setLoading(true);
       setError(null);
+
+      // Make API call to the login endpoint
+      const response = await apiService.post('/auth/login/', {
+        username: credentials.username || credentials.email, // Support both username and email
+        password: credentials.password,
+      });
+
+      const { access_token, refresh_token, user: userData } = response.data;
+
+      // Store tokens in localStorage
+      localStorage.setItem(process.env.REACT_APP_AUTH_TOKEN_KEY, access_token);
+      localStorage.setItem(
+        process.env.REACT_APP_REFRESH_TOKEN_KEY,
+        refresh_token
+      );
+
+      setUser(userData);
       return { success: true };
-    } else {
-      setError('Invalid username or password');
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        'Login failed';
+      setError(errorMessage);
       return {
         success: false,
-        error: 'Invalid username or password',
+        error: errorMessage,
       };
+    } finally {
+      setLoading(false);
     }
   };
 

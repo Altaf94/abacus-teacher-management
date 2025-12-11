@@ -58,14 +58,17 @@ api.interceptors.response.use(
         // Refresh token failed, redirect to login
         localStorage.removeItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
         localStorage.removeItem(process.env.REACT_APP_REFRESH_TOKEN_KEY);
-        window.location.href = '/login';
+        // window.location.href = '/login';
       }
     }
 
-    // Handle other errors
-    const message =
-      error.response?.data?.message || error.message || 'An error occurred';
-    toast.error(message);
+    // Show toast for errors except login
+    const isLoginError = error.config?.url?.includes('/auth/login');
+    if (!isLoginError) {
+      const message =
+        error.response?.data?.message || error.message || 'An error occurred';
+      toast.error(message);
+    }
 
     return Promise.reject(error);
   }

@@ -23,15 +23,15 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
-    localStorage.removeItem(process.env.REACT_APP_REFRESH_TOKEN_KEY);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     setUser(null);
     setError(null);
   }, []);
 
   const checkAuth = useCallback(async () => {
     try {
-      const token = localStorage.getItem(process.env.REACT_APP_AUTH_TOKEN_KEY);
+      const token = localStorage.getItem('access_token');
       if (token) {
         // Skip the /auth/me call since this endpoint doesn't exist
         // Just set a basic user object if token exists
@@ -57,23 +57,28 @@ export const AuthProvider = ({ children }) => {
 
       // Make API call to the login endpoint
       const response = await apiService.post('/auth/login/', {
-        username: credentials.username || credentials.email, // Support both username and email
+        identifier: credentials.username || credentials.email, // Use identifier for backend compatibility
         password: credentials.password,
       });
 
       const { access_token, refresh_token, user: userData } = response.data;
 
-      // Store tokens in localStorage
-      localStorage.setItem(process.env.REACT_APP_AUTH_TOKEN_KEY, access_token);
-      localStorage.setItem(
-        process.env.REACT_APP_REFRESH_TOKEN_KEY,
-        refresh_token
-      );
+      // Store tokens in localStorage with fixed keys
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
+
+      // Log tokens for confirmation
+      console.log('Access token stored:', access_token);
+      console.log('Refresh token stored:', refresh_token);
 
       setUser(userData);
       return { success: true };
     } catch (error) {
+      console.log('Login error:', error);
+      console.log('Error response:', error.response);
+      console.log('Error response data:', error.response?.data);
       const errorMessage =
+        error.response?.data?.error ||
         error.response?.data?.message ||
         error.response?.data?.detail ||
         'Login failed';
@@ -95,11 +100,8 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.post('/auth/register', userData);
       const { accessToken, refreshToken, user: newUser } = response.data;
 
-      localStorage.setItem(process.env.REACT_APP_AUTH_TOKEN_KEY, accessToken);
-      localStorage.setItem(
-        process.env.REACT_APP_REFRESH_TOKEN_KEY,
-        refreshToken
-      );
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
 
       setUser(newUser);
       return { success: true };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import logoutIcon from '../assets/images/Logout.png';
@@ -11,202 +12,169 @@ export default function AssignFlash() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
-  const [assignMode, setAssignMode] = useState('individual'); // 'individual' | 'class'
+  const [assignMode, setAssignMode] = useState('individual');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [students, setStudents] = useState([]);
   const [sections, setSections] = useState([]);
-  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
-  const [isLoadingSections, setIsLoadingSections] = useState(false);
+  // const [isLoadingStudents, setIsLoadingStudents] = useState(false); // Removed unused
+  // const [isLoadingSections, setIsLoadingSections] = useState(false); // Removed unused
   const [flashData, setFlashData] = useState(null);
+  // const [apiResponse, setApiResponse] = useState(null); // Removed unused
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [isApiLoading, setIsApiLoading] = useState(true); // Removed unused
 
-  // Load flash data from sessionStorage
+  // Fetch students & sections
+  useEffect(() => {
+    // setIsApiLoading(true); // Removed unused
+    fetch('http://127.0.0.1:8000/api/students_sections/')
+      .then(res => res.json())
+      .then(data => {
+        // setApiResponse(data); // Removed unused
+        if (Array.isArray(data.students)) setStudents(data.students);
+        if (Array.isArray(data.sections)) {
+          setSections(data.sections.map(s => ({ id: s, name: s })));
+        }
+        // setIsApiLoading(false); // Removed unused
+      })
+      .catch(err => {
+        // setApiResponse({ error: err.message }); // Removed unused
+        // setIsApiLoading(false); // Removed unused
+      });
+  }, []);
+
+  // Load flash data
   useEffect(() => {
     try {
-      const storedData = window.sessionStorage.getItem('flashGeneratorPlan');
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        setFlashData(parsedData);
-        console.log('Loaded flash data:', parsedData);
-      }
+      const storedData = sessionStorage.getItem('flashGeneratorPlan');
+      if (storedData) setFlashData(JSON.parse(storedData));
     } catch (error) {
-      console.error('Error loading flash data:', error);
+      console.error('Flash load error:', error);
     }
   }, []);
 
-  // Fetch students data
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setIsLoadingStudents(true);
-        const response = await apiService.get('/students/');
-        const studentsData = response.data?.students || [];
-        setStudents(studentsData);
-        if (studentsData.length > 0) {
-          setSelectedStudent(studentsData[0].username);
-        }
-      } catch (error) {
-        console.error('Error fetching students:', error);
-        toast.error('Failed to load students');
-      } finally {
-        setIsLoadingStudents(false);
-      }
-    };
-
-    fetchStudents();
-  }, []);
-
-  // Fetch sections data
-  useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        setIsLoadingSections(true);
-        const response = await apiService.get('/sections/');
-        const sectionsData = response.data?.sections || [];
-        setSections(sectionsData);
-        if (sectionsData.length > 0) {
-          setSelectedSection(sectionsData[0].name);
-        }
-      } catch (error) {
-        console.error('Error fetching sections:', error);
-        toast.error('Failed to load sections');
-      } finally {
-        setIsLoadingSections(false);
-      }
-    };
-
-    fetchSections();
-  }, []);
-
+  // ---------- FIXED HANDLE SUBMIT ----------
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     try {
-      if (!flashData || !flashData.items || flashData.items.length === 0) {
-        toast.error(
-          'No flash activities to assign. Please go back and add some activities.'
-        );
+      // Always use access token for API calls
+      const token =
+        localStorage.getItem('access_token') ||
+        sessionStorage.getItem('access_token');
+
+      // Check if token exists and is a valid JWT
+      if (!token || token.split('.').length !== 3) {
+        toast.error('Invalid or missing auth token. Please login again.');
+        setIsSubmitting(false);
         return;
       }
 
-      // Get the selected student or section ID
-      let studentId = null;
-      let sectionId = null;
-
-      if (assignMode === 'individual') {
-        const selectedStudentData = students.find(
-          s => s.username === selectedStudent
-        );
-        studentId = selectedStudentData?.id || null;
-      } else {
-        const selectedSectionData = sections.find(
-          s => s.name === selectedSection
-        );
-        sectionId = selectedSectionData?.id || null;
+      // Decode token for debugging
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Token type:', payload.token_type);
+      } catch (e) {
+        console.log('Token decode failed');
+        toast.error('Auth token is corrupted. Please login again.');
+        setIsSubmitting(false);
+        return;
       }
 
-      // Make API calls for each flash activity
-      const apiCalls = flashData.items.map(async item => {
-        const requestData = {
+      if (!flashData || !flashData.items?.length) {
+        toast.error('No flash activities to assign.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const assignmentCalls = flashData.items.map(async item => {
+        const payload = {
           concept: item.concept,
-          length_of_question: item.length?.toString() || '6',
-          number_of_questions: item.questions,
-          student_id: studentId,
-          teacher_id: null, // You can add teacher_id logic here if needed
-          section_id: sectionId,
-          speed: item.time,
-          activity_name: title || 'Untitled Activity',
+          length_of_question: item.length || 1,
+          number_of_questions: item.questions || 1,
+          speed: item.time || 30,
+          assign_type: assignMode,
+          ...(assignMode === 'individual'
+            ? { target_student: selectedStudent }
+            : { target_class_section: selectedSection }),
         };
 
-        console.log('Making API call with data:', requestData);
         try {
-          return await apiService.post('/questions/', requestData);
+          const res = await apiService.post('/assignments/', payload, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          return res.data;
         } catch (error) {
-          console.error(`Failed to assign item: ${item.concept}`, error);
-          // Return null for failed items instead of throwing
+          console.error('Assignment API error:', error);
           return null;
         }
       });
 
-      // Wait for all API calls to complete
-      const responses = await Promise.all(apiCalls);
-      console.log('All API responses:', responses);
+      const results = await Promise.all(assignmentCalls);
+      const successCount = results.filter(r => r !== null).length;
 
-      // Check if any API calls succeeded
-      const successfulResponses = responses.filter(
-        response => response !== null
-      );
-      if (successfulResponses.length === 0) {
-        toast.error(
-          'No flash activities could be assigned. Please check your selections and try again.'
-        );
+      if (successCount === 0) {
+        toast.error('No assignments were created.');
+        setIsSubmitting(false);
         return;
       }
 
-      // Show warning if some failed
-      if (successfulResponses.length < responses.length) {
-        const failedCount = responses.length - successfulResponses.length;
-        toast.warning(
-          `${successfulResponses.length} activities assigned successfully, ${failedCount} failed.`
-        );
-      }
+      toast.success(`${successCount} assignment(s) created!`);
 
-      // Store the assignment data for reference
-      const payload = {
-        flashData,
-        title: title || 'Untitled Activity',
-        assignMode,
-        selectedStudent: assignMode === 'individual' ? selectedStudent : null,
-        selectedSection: assignMode === 'class' ? selectedSection : null,
-        studentId,
-        sectionId,
-        apiResponses: responses,
-        createdAt: Date.now(),
-      };
+      sessionStorage.setItem(
+        'flashAssignment',
+        JSON.stringify({
+          flashData,
+          title: title || 'Untitled Activity',
+          assignMode,
+          selectedStudent: assignMode === 'individual' ? selectedStudent : null,
+          selectedSection: assignMode === 'class' ? selectedSection : null,
+          assignmentResults: results,
+          createdAt: Date.now(),
+        })
+      );
 
-      window.sessionStorage.setItem('flashAssignment', JSON.stringify(payload));
-
-      // Only show success message if all activities were assigned successfully
-      if (successfulResponses.length === responses.length) {
-        toast.success('Flash activities assigned successfully!');
-      }
-
-      // Navigate to confirmation screen
       navigate('/notification-sent');
     } catch (error) {
-      console.error('Error submitting assignment:', error);
-      toast.error('Failed to assign flash activities. Please try again.');
+      console.error(error);
+      toast.error('Failed to assign.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // ------------------ RETURN JSX ------------------
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-yellow-200/60" />
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 md:p-8">
-        <div className="bg-[#faf9ed] rounded-3xl shadow-lg w-[95vw] max-w-[1600px] min-h-[88vh] p-6 md:p-10 flex flex-col relative">
+    <div className="relative min-h-screen bg-yellow-200/60 p-2 sm:p-4 md:p-8">
+      <div className="relative z-10 min-h-screen flex items-center justify-center">
+        <div className="bg-[#faf9ed] rounded-3xl shadow-lg w-full max-w-[1600px] min-h-[88vh] p-2 sm:p-4 md:p-10 flex flex-col relative">
           {/* Header */}
-          <div className="flex items-start justify-between mb-8">
-            <div className="w-16 md:w-24" />
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
+            <div className="w-0 sm:w-16 md:w-24" />
             <h1
-              className="text-2xl md:text-4xl font-extrabold tracking-wide text-center"
+              className="text-xl sm:text-2xl md:text-4xl font-extrabold tracking-wide text-center"
               style={{ fontFamily: 'Poppins, sans-serif' }}
             >
               FLASH NUMBER GENERATOR
             </h1>
+
             <button
               onClick={() => navigate('/login')}
-              className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+              className="flex flex-col items-center hover:scale-105 transition-transform"
             >
               <img
                 src={logoutIcon}
                 alt="Logout"
-                className="w-10 h-10 md:w-16 md:h-16"
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-16 md:h-16"
               />
               <span className="text-xs md:text-sm mt-1">Logout</span>
             </button>
           </div>
 
-          {/* Title input */}
-          <div className="flex items-center justify-center gap-3 mb-6">
+          {/* Title Input */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <div className="text-base md:text-lg font-semibold">
               Title of Activity:
             </div>
@@ -215,59 +183,58 @@ export default function AssignFlash() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="Your title here"
-              className="w-[220px] md:w-[360px] h-10 border-2 border-gray-300 rounded-md px-3 bg-white text-sm md:text-base"
+              className="w-full sm:w-[220px] md:w-[360px] h-10 border-2 border-gray-300 rounded-md px-3 bg-white"
             />
           </div>
 
-          {/* Assign panels */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr_120px_1fr] items-start gap-6 md:gap-10">
+          {/* Assign Panels */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr_120px_1fr] gap-4 sm:gap-6 md:gap-10">
             {/* Individual */}
             <div className="flex flex-col items-center">
               <div className="text-base md:text-lg font-semibold mb-2">
                 Assign task to individual
               </div>
+
               <button
                 onClick={() => setAssignMode('individual')}
-                className={`p-3 rounded-2xl border-2 ${
+                className={`p-2 sm:p-3 rounded-2xl border-2 ${
                   assignMode === 'individual'
                     ? 'border-blue-600'
                     : 'border-transparent'
-                } hover:border-blue-600 transition-colors`}
+                } hover:border-blue-600`}
               >
                 <img
                   src={studentIcon}
                   alt="Student"
-                  className="w-36 h-36 md:w-56 md:h-56"
+                  className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16"
                 />
               </button>
-              <div className="mt-4">
-                <select
-                  value={selectedStudent}
-                  onChange={e => setSelectedStudent(e.target.value)}
-                  disabled={isLoadingStudents}
-                  className="w-[220px] md:w-[300px] h-10 border-2 border-gray-300 rounded-md px-3 bg-white text-sm md:text-base font-semibold disabled:opacity-50"
-                >
-                  {isLoadingStudents ? (
-                    <option value="">Loading students...</option>
-                  ) : students.length > 0 ? (
-                    students.map(student => (
-                      <option
-                        key={student.id || student.username}
-                        value={student.username}
-                      >
-                        {student.username}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">No students available</option>
-                  )}
-                </select>
+
+              <div className="mt-2 sm:mt-4 w-full flex flex-col items-center">
+                <Select
+                  options={students.map(s => ({
+                    value: s.username,
+                    label: s.username,
+                  }))}
+                  value={
+                    selectedStudent
+                      ? { value: selectedStudent, label: selectedStudent }
+                      : null
+                  }
+                  onChange={opt => setSelectedStudent(opt?.value || '')}
+                  isLoading={false}
+                  isClearable
+                  placeholder="Search & select student..."
+                  className="w-full sm:w-[220px] md:w-[300px]"
+                />
               </div>
             </div>
 
             {/* OR */}
-            <div className="hidden md:flex items-center justify-center">
-              <div className="text-3xl md:text-5xl font-extrabold">OR</div>
+            <div className="flex items-center justify-center md:flex hidden">
+              <div className="text-2xl sm:text-3xl md:text-5xl font-extrabold">
+                OR
+              </div>
             </div>
 
             {/* Class */}
@@ -275,56 +242,53 @@ export default function AssignFlash() {
               <div className="text-base md:text-lg font-semibold mb-2">
                 Assign task to class
               </div>
+
               <button
                 onClick={() => setAssignMode('class')}
-                className={`p-3 rounded-2xl border-2 ${
+                className={`p-2 sm:p-3 rounded-2xl border-2 ${
                   assignMode === 'class'
                     ? 'border-blue-600'
                     : 'border-transparent'
-                } hover:border-blue-600 transition-colors`}
+                } hover:border-blue-600`}
               >
                 <img
                   src={teachingIcon}
                   alt="Class"
-                  className="w-36 h-36 md:w-56 md:h-56"
+                  className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16"
                 />
               </button>
-              <div className="mt-4">
-                <select
-                  value={selectedSection}
-                  onChange={e => setSelectedSection(e.target.value)}
-                  disabled={isLoadingSections}
-                  className="w-[220px] md:w-[300px] h-10 border-2 border-gray-300 rounded-md px-3 bg-white text-sm md:text-base font-semibold disabled:opacity-50"
-                >
-                  {isLoadingSections ? (
-                    <option value="">Loading sections...</option>
-                  ) : sections.length > 0 ? (
-                    sections.map(section => (
-                      <option
-                        key={section.id || section.name}
-                        value={section.name}
-                      >
-                        {section.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">No sections available</option>
-                  )}
-                </select>
+
+              <div className="mt-2 sm:mt-4 w-full flex flex-col items-center">
+                <Select
+                  options={sections.map(sec => ({
+                    value: sec.name,
+                    label: sec.name,
+                  }))}
+                  value={
+                    selectedSection
+                      ? { value: selectedSection, label: selectedSection }
+                      : null
+                  }
+                  onChange={opt => setSelectedSection(opt?.value || '')}
+                  isLoading={false}
+                  isClearable
+                  placeholder="Search & select section..."
+                  className="w-full sm:w-[220px] md:w-[300px]"
+                />
               </div>
             </div>
           </div>
 
-          {/* Footer actions */}
-          <div className="absolute left-4 md:left-8 bottom-4 flex items-center gap-8">
+          {/* Footer Buttons */}
+          <div className="absolute left-2 sm:left-4 md:left-8 bottom-2 sm:bottom-4">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+              className="flex flex-col items-center hover:scale-105 transition-transform"
             >
               <img
                 src={universityIcon}
                 alt="Dashboard"
-                className="w-14 h-14 md:w-20 md:h-20"
+                className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20"
               />
               <span className="text-xs md:text-sm font-semibold mt-1">
                 DASHBOARD
@@ -332,18 +296,42 @@ export default function AssignFlash() {
             </button>
           </div>
 
-          <div className="absolute right-4 md:right-8 bottom-4">
+          <div className="absolute right-2 sm:right-4 md:right-8 bottom-2 sm:bottom-4">
             <button
               onClick={handleSubmit}
-              className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+              className={`flex flex-col items-center hover:scale-105 transition-transform ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting}
             >
-              <img
-                src={studentIcon}
-                alt="Submit"
-                className="w-14 h-14 md:w-20 md:h-20"
-              />
+              {isSubmitting ? (
+                <svg
+                  className="animate-spin h-6 w-6 text-blue-600 mb-1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  ></path>
+                </svg>
+              ) : (
+                <img
+                  src={studentIcon}
+                  alt="Submit"
+                  className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20"
+                />
+              )}
               <span className="text-xs md:text-sm font-semibold mt-1">
-                SUBMIT
+                {isSubmitting ? 'Submitting...' : 'SUBMIT'}
               </span>
             </button>
           </div>

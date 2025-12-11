@@ -7,6 +7,7 @@ import profileImg from '../assets/images/Profile.png';
 import notificationImg from '../assets/images/Notifications.png';
 import logsImg from '../assets/images/Logs.png';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import UnderConstruction from './common/UnderConstruction';
 
 const dashboardItems = [
@@ -21,9 +22,14 @@ const dashboardItems = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [showUnderConstruction, setShowUnderConstruction] = useState(false);
   // Debug: Log when Dashboard renders
   console.log('Dashboard rendered');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-yellow-50 p-4">
       <div
@@ -31,7 +37,10 @@ const Dashboard = () => {
         style={{ minHeight: '70vh' }}
       >
         {/* Logout button */}
-        <button className="absolute top-4 right-4 md:top-6 md:right-6 flex flex-col items-center group focus:outline-none hover:scale-105 transition-transform">
+        <button
+          className="absolute top-4 right-4 md:top-6 md:right-6 flex flex-col items-center group focus:outline-none hover:scale-105 transition-transform"
+          onClick={handleLogout}
+        >
           <img
             src={LogoutImg}
             alt="Logout"
@@ -68,36 +77,20 @@ const Dashboard = () => {
                 onClick={
                   item.label === 'Flash Number'
                     ? () => {
-                        console.log('Flash Number button clicked');
-                        console.log('navigate function:', navigate);
                         navigate('/flash-number-game');
                       }
-                    : item.label === 'Reports'
+                    : [
+                          'Reports',
+                          'Worksheets',
+                          'Profile',
+                          'Notifications',
+                          'Logs',
+                        ].includes(item.label)
                       ? () => {
-                          console.log('Reports button clicked');
-                          navigate('/reports');
+                          console.log(item.label + ' button clicked');
+                          setShowUnderConstruction(true);
                         }
-                      : item.label === 'Worksheets'
-                        ? () => {
-                            console.log('Worksheets button clicked');
-                            navigate('/worksheets');
-                          }
-                        : item.label === 'Profile'
-                          ? () => {
-                              console.log('Profile button clicked');
-                              navigate('/profile');
-                            }
-                          : item.label === 'Notifications'
-                            ? () => {
-                                console.log('Notifications button clicked');
-                                navigate('/notifications');
-                              }
-                            : item.label === 'Logs'
-                              ? () => {
-                                  console.log('Logs button clicked');
-                                  setShowUnderConstruction(true);
-                                }
-                              : undefined
+                      : undefined
                 }
               >
                 <img

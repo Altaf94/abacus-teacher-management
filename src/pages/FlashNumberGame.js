@@ -61,38 +61,18 @@ export default function FlashNumberGame() {
   const [items, setItems] = useState([]);
   const [isLoadingConcepts, setIsLoadingConcepts] = useState(true);
 
-  // Fetch complexities from API
+  // Remove API call and use hardcoded concepts
   useEffect(() => {
-    const fetchConcepts = async () => {
-      try {
-        setIsLoadingConcepts(true);
-        const response = await apiService.get('/complexities/');
-        const complexitiesData = response.data?.complexities || [];
-        setConcepts(complexitiesData);
-
-        // Set the first concept as selected if available
-        if (complexitiesData.length > 0) {
-          setSelectedConcept(complexitiesData[0].name);
-        }
-      } catch (error) {
-        console.error('Error fetching complexities:', error);
-        toast.error('Failed to load concepts. Please try again.');
-
-        // Fallback to hardcoded concepts if API fails
-        const fallbackConcepts = [
-          { id: 1, name: 'Junior +4' },
-          { id: 2, name: 'Senior +4' },
-          { id: 3, name: 'Senior -4' },
-          { id: 4, name: 'Multiplication' },
-        ];
-        setConcepts(fallbackConcepts);
-        setSelectedConcept(fallbackConcepts[0].name);
-      } finally {
-        setIsLoadingConcepts(false);
-      }
-    };
-
-    fetchConcepts();
+    setIsLoadingConcepts(true);
+    const fallbackConcepts = [
+      { id: 1, name: 'Junior +4' },
+      { id: 2, name: 'Senior +4' },
+      { id: 3, name: 'Senior -4' },
+      { id: 4, name: 'Multiplication' },
+    ];
+    setConcepts(fallbackConcepts);
+    setSelectedConcept(fallbackConcepts[0].name);
+    setIsLoadingConcepts(false);
   }, []);
 
   const totalQuestions = useMemo(
@@ -117,7 +97,11 @@ export default function FlashNumberGame() {
     setItems(prev => prev.filter(i => i.id !== id));
   };
 
-  const assign = () => {
+  const handleNext = () => {
+    if (items.length === 0) {
+      toast.error('Please add at least one question before proceeding.');
+      return;
+    }
     // Store all current form data for the next page
     try {
       const payload = {
@@ -343,16 +327,16 @@ export default function FlashNumberGame() {
 
           <div className="absolute right-3 sm:right-4 md:right-8 bottom-3 sm:bottom-4 flex flex-col items-center">
             <button
-              onClick={assign}
+              onClick={handleNext}
               className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
             >
               <img
                 src={studentIcon}
-                alt="Assign"
+                alt="Next"
                 className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16"
               />
               <span className="text-xs sm:text-sm md:text-base font-semibold mt-1">
-                Assign
+                Next
               </span>
             </button>
           </div>

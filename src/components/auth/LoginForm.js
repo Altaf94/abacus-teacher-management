@@ -9,19 +9,18 @@ const LoginForm = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleLogin = async e => {
     e.preventDefault();
-    setError('');
+    // setError('');
     const result = await login({ username, password });
     if (result.success) {
       toast.success('Login successful!');
       navigate('/dashboard');
     } else {
-      const errorMessage = result.error || 'Invalid username or password';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      // Show only the backend error message
+      // setError(result.error);
+      toast.error(result.error);
     }
   };
 
@@ -47,11 +46,7 @@ const LoginForm = () => {
                 Login
               </h1>
               <form onSubmit={handleLogin} className="space-y-6">
-                {error && (
-                  <div className="text-red-600 text-center font-semibold">
-                    {error}
-                  </div>
-                )}
+                {/* Error message removed from screen, only shown in toast */}
                 <div>
                   <label className="block text-sm font-medium text-black mb-2">
                     Username:
